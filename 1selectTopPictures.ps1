@@ -173,7 +173,7 @@ foreach ($item in $top) {
         "Contrast"     = $item[3]
     }
     $dataToExport.Add($row) | Out-Null
-}
+} 
 
 # Export the ArrayList to a CSV file
 $dataToExport | Export-Csv -Path (Join-Path -Path $outputPath -ChildPath 'temp.csv') -NoTypeInformation
