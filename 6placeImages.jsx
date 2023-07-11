@@ -32,7 +32,43 @@ function saveJPGandClose() {
     doc.close(SaveOptions.DONOTSAVECHANGES);
 }
 
-//put them into positions
+function getGroupByName(doc, name) {
+    for (var i = 0; i < doc.layerSets.length; i++) {
+        if (doc.layerSets[i].name === name) {
+            return doc.layerSets[i];
+        }
+    }
+    return null; // Return null if no group with the given name was found
+}
+
+function moveLayersToGroups() {
+    var doc = app.activeDocument;
+
+    // Loop through each layer in the document
+    for (var i = 0; i < doc.layers.length; i++) {
+        var layer = doc.layers[i];
+
+        // If layer is a group, locked or is a text layer, skip this layer
+        if (layer.typename === "LayerSet" || layer.allLocked || layer.kind === LayerKind.TEXT) {
+            continue;
+        }
+
+        // Get the name of the layer (which should be a zero-padded number)
+        var numStr = layer.name;
+
+        // Get the corresponding group (which should have the same name as the layer)
+        var group = getGroupByName(doc, numStr);
+
+        // If the group does not exist, skip this layer
+        if (!group) {
+            continue;
+        }
+
+        // Move the layer to the group
+        layer.move(group, ElementPlacement.INSIDE);
+    }
+}
+
 
 
 function main() {
@@ -105,24 +141,69 @@ function main() {
             app.activeDocument = newDoc;
 
             // Compute the center position of the current grid cell
-
             var cellCenterX = cell.x;
             var cellCenterY = cell.y;
 
-
+            // Convert the layer's bounds to simple numbers
+            var layerWidth = newLayer.bounds[2].as('px') - newLayer.bounds[0].as('px');
+            var layerHeight = newLayer.bounds[3].as('px') - newLayer.bounds[1].as('px');
 
             // Adjust for the layer's size to position its center at the cell's center
-            var layerCenterX = cellCenterX - (newLayer.bounds.width / 2);
-            var layerCenterY = cellCenterY - (newLayer.bounds.height / 2);
-
-            alert(layerCenterX);
-            alert(layerCenterY);
+            var layerCenterX = cellCenterX - (layerWidth / 2);
+            var layerCenterY = cellCenterY - (layerHeight / 2);
 
             // Move the layer to the computed position
-            newLayer.translate(layerCenterX, layerCenterY);
+            newLayer.translate(UnitValue(layerCenterX, 'px'), UnitValue(layerCenterY, 'px'));
         }
+
     }
     app.activeDocument = newDoc;
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+        // iterate over all the layers in the new document
+        for (var i = 0; i < newDoc.layers.length; i++) {
+            var layer = newDoc.layers[i];
+
+            if (layer.typename === "LayerSet" || layer.allLocked || layer.kind === LayerKind.TEXT) {
+                continue;
+            }
+
+            // The layer name is the group name where this layer should be moved
+            var groupName = layer.name;
+
+            // Find the group layer with the same name as the current layer
+            var groupLayer = findGroupLayer(newDoc, groupName);
+
+            // If such a group exists, move the layer into this group
+            if (groupLayer) {
+                layer.move(groupLayer, ElementPlacement.INSIDE);
+            } else {
+                alert("Couldn't find a group named " + groupName + " to move the layer " + layer.name);
+            }
+        }
+
+        function findGroupLayer(doc, groupName) {
+            for (var i = 0; i < doc.layerSets.length; i++) {
+                if (doc.layerSets[i].name === groupName) {
+                    return doc.layerSets[i];
+                }
+            }
+            // If no matching group is found, return null
+            return null;
+        }
+
+    }
 }
 
 

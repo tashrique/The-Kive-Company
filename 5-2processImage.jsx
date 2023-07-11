@@ -2,7 +2,7 @@
     // Initialization
     {
         app.preferences.rulerUnits = Units.PIXELS;
-        var TOLERANCE = 15;
+        var TOLERANCE = 6;
 
         // Pastel color Presents
         var presets = [
@@ -375,21 +375,19 @@
         layerSetRef.name = docNameWithoutExtension;
     }
     //Name layers accoridng to the doc name
-  function nameLayers() {
-    var docRef = app.activeDocument;
+    function nameLayers() {
+        var docRef = app.activeDocument;
 
-    // Get the document's name without its extension
-    var docNameWithoutExtension = docRef.name.replace(/\.[^\.]+$/, '');
+        // Get the document's name without its extension
+        var docNameWithoutExtension = docRef.name.replace(/\.[^\.]+$/, '');
 
-    // Rename all layers
-    for (var i = docRef.artLayers.length - 1; i >= 0; i--) {
+        // Rename all layers
+        for (var i = docRef.artLayers.length - 1; i >= 0; i--) {
 
-        // Use this layerNumber in the name
-        docRef.artLayers[i].name = docNameWithoutExtension;
+            // Use this layerNumber in the name
+            docRef.artLayers[i].name = docNameWithoutExtension;
+        }
     }
-}
-
-
     //Crop 
     function Crop2Size() {
         var status = 0;
@@ -453,11 +451,11 @@
     }
     //Save and close
     function savePhoto() {
-        var path = openFile();
+        var path = new File($.fileName).parent;
         var doc = app.activeDocument;
 
         // Create a new folder path
-        var newFolderPath = new Folder(path + "/Image PSDs");
+        var newFolderPath = new Folder(path + "/Working Folder");
 
         // Check if the folder exists, if not create it
         if (!newFolderPath.exists) {
@@ -467,27 +465,18 @@
         // Define the new file path
         var newFilePath = new File(newFolderPath + "/" + doc.name);
 
-        // Save options
-        var options = new PhotoshopSaveOptions();
-        options.layers = true; // Preserve layers
-
-        // Save the document to the new file path
-        doc.saveAs(newFilePath, options, true);
-
         // doc.trim(TrimType.TRANSPARENT);
-        // var file = new File(newFilePath + '.jpg');
-        // var jpgSaveOptions = new JPEGSaveOptions();
-        // jpgSaveOptions.embedColorProfile = true;
-        // jpgSaveOptions.formatOptions = FormatOptions.STANDARDBASELINE;
-        // jpgSaveOptions.matte = MatteType.NONE;
-        // jpgSaveOptions.quality = 12; // Maximum quality
-        // doc.saveAs(file, jpgSaveOptions, true, Extension.LOWERCASE);
+        var file = new File(newFilePath);
+        var jpgSaveOptions = new JPEGSaveOptions();
+        jpgSaveOptions.embedColorProfile = true;
+        jpgSaveOptions.formatOptions = FormatOptions.STANDARDBASELINE;
+        jpgSaveOptions.matte = MatteType.NONE;
+        jpgSaveOptions.quality = 12; // Maximum quality
+        doc.saveAs(file, jpgSaveOptions, true, Extension.LOWERCASE);
 
 
-
-
-        // // Close the document without saving changes (since we've just saved it)
-        // // doc.close(SaveOptions.DONOTSAVECHANGES);
+        // Close the document without saving changes (since we've just saved it)
+        doc.close(SaveOptions.DONOTSAVECHANGES);
 
     }
     //Open file and get Filepath
@@ -575,9 +564,14 @@ function main() {
             // unlink();
         }
 
+        activeDocument.flatten();
+        savePhoto();
+
     }
 
 }
+
+
 
 main();
 
