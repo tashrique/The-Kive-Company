@@ -172,7 +172,7 @@ foreach ($item in $top) {
         "White"        = $item[2]
         "Contrast"     = $item[3]
     }
-    $dataToExport.Add($row) | Out-Null
+    $dataToExport.Add($row) | Out-Null 
 } 
 
 # Export the ArrayList to a CSV file
